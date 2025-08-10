@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Str;
+use DB;
+
+class SeedTranslationsCommand extends Command
+{
+    protected $signature = 'translations:seed {count=100000}';
+    protected $description = 'Seed translations table with a large number of records for performance testing.';
+
+    public function handle(): int
+    {
+        $count = (int) $this->argument('count');
+        $locales = ['en', 'fr', 'es', 'de', 'pt'];
+        $contexts = ['web', 'mobile', 'desktop'];
+        $batchSize = 1000;
+
+        $this->info("Seeding {$count} translations in batches of {$batchSize}...");
+
+        $now = date('Y-m-d H:i:s');
+
+        $inserted = 0;
+
+        while ($inserted < $count) {
+            $rows = [];
+
+            for ($i = 0; $i < $batchSize && $inserted < $count; $i++, $inserted++) {
+                $locale = $locales[array_rand($locales)];
+                $key = 'key_' . Str::random(12) . '_' . $inserted;
+                $content = 'Translation for ' . $key . ' in ' . $locale;
+                $context = $contexts[array_rand($contexts)];
+
+                $rows[] = [
+                    'key' => $key,
+                    'locale' => $locale,
+                    'content' => $content,
+                    'context' => $context,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            DB::table('translations')->insert($rows);
+        }
+
+        $this->info('Done.');
+
+        return 0;
+    }
+}

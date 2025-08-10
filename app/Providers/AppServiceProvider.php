@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\TranslationRepositoryInterface;
+use App\Repositories\EloquentTranslationRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(TranslationRepositoryInterface::class, EloquentTranslationRepository::class);
     }
 
     /**
